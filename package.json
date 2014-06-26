@@ -1,0 +1,43 @@
+{
+  "name": "rx-cli",
+  "title": "Reactive Extensions for JavaScript (RxJS) Command Line Interface",
+  "description": "RxJS Command Line for Custom Builds",
+  "version": "0.0.1",
+  "homepage": "https://github.com/Reactive-Extensions/RxJS-CLI",
+  "author": {
+    "name": "Cloud Programmability Team",
+    "url": "https://github.com/Reactive-Extensions/RxJS-CLI/blob/master/authors.txt"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Reactive-Extensions/RxJS-CLI.git"
+  },
+  "licenses": [
+    {
+      "type": "Apache License, Version 2.0",
+      "url": "https://github.com/Reactive-Extensions/RxJS-CLI/blob/master/LICENSE"
+    }
+  ],
+  "bugs": "https://github.com/Reactive-Extensions/RxJS-CLI/issues",
+  "dependencies": {
+    "rx": "*",
+    "commander": "*",
+    "grunt-cli": "*",
+    "grunt": "*",
+    "grunt-contrib-uglify": "*",
+    "grunt-contrib-concat": "*",
+    "load-grunt-tasks": "*"    
+  },
+  "keywords": [
+    "RxJS",
+    "Rx",
+    "CLI"
+  ],
+  "bin": {
+    "rx": "bin/rx"
+  },
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "preferGlobal": true
+}
