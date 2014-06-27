@@ -5,17 +5,11 @@ var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var del = require('del');
 var program = require('commander');
-var dependencies = require('../lib/dependencies.json');
+var dependencies = require('../lib/dependencies');
+var LocalSet = require('../lib/localset');
 
 // Program end
 var requiredEnd = require('../lib/footer');
-
-// Get around removing run
-gulp.__proto__.runBuild = function () {
-  var tasks = arguments.length ? arguments : ['default'];
-
-  this.start.apply(this, tasks);
-};
 
 program
   .version('0.0.1')
@@ -32,30 +26,63 @@ program.on('--help', function(){
 
 program.parse(process.argv);
 
-var requiredFiles = [];
+var requiredFiles = new LocalSet(),
+  fileLocations = [];
+
 if (program.methods) {
   
   // Expect commas to seperate methods
-  var files = program.methods.split(',');
-
-  for (var i = 0, len = files.length; i < len; i++) {
-    var file = files[i];
-
-    // TODO: Add each file
+  var methods = program.methods.split(',');
+  if (methods.length === 0) {
+    console.log('Methods are required');
+    program.help();
   }
+
+  methods.forEach(function (method) {
+    var method = method.trim().toLowerCase();
+
+    // Check if an alias
+    var alias = dependencies.aliases[method];
+    if (alias) {
+      method = alias;
+    }
+
+    recursivelyAdd(method);
+
+    function recursivelyAdd(m) {
+      if (requiredFiles.add(m)) {
+        // Check the source
+        var methodData = dependencies.operators[m];
+        if (!m) {
+          console.log('Method not found: '+m);
+          program.help();
+        }
+
+        fileLocations.push.apply(fileLocations, methodData.source);
+
+        // Run the dependencies
+        methodData.dependsOn.forEach(function (d) {
+          recursivelyAdd(d);
+        });
+      } 
+    }
+  });
+} else {
+  // TODO: Load from file?
+  console.log('Methods are required');
+  program.help();
 }
 
 var requiredStart = program.compat ?
   require('../lib/headercompat') :
   require('../lib/header');
 
-var totalFiles = requiredStart.concat(requiredFiles, requiredEnd);
+var totalFiles = requiredStart.concat(fileLocations, requiredEnd);
 
 var outputFile = 'rx.custom.js';
 var outputMinFile = 'rx.custom.min.js';
 
 gulp.task('clean', function(cb) {
-  // You can use multiple globbing patterns as you would with `gulp.src`
   del(['build'], cb);
 });
 
@@ -74,4 +101,5 @@ gulp.task('minify', ['concat'], function () {
 
 gulp.task('default', ['minify']);
 
-gulp.runBuild('default');
+// Start the build!
+gulp.start('default');
