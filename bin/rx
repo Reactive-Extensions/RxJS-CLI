@@ -10,6 +10,13 @@ var dependencies = require('../lib/dependencies.json');
 // Program end
 var requiredEnd = require('../lib/footer');
 
+// Get around removing run
+gulp.__proto__.runBuild = function () {
+  var tasks = arguments.length ? arguments : ['default'];
+
+  this.start.apply(this, tasks);
+};
+
 program
   .version('0.0.1')
   .option('-m, --methods <methods>', 'Include methods')
@@ -67,4 +74,4 @@ gulp.task('minify', ['concat'], function () {
 
 gulp.task('default', ['minify']);
 
-gulp.run('default');
+gulp.runBuild('default');
