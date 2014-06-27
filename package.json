@@ -22,11 +22,10 @@
   "dependencies": {
     "rx": "*",
     "commander": "*",
-    "grunt-cli": "*",
-    "grunt": "*",
-    "grunt-contrib-uglify": "*",
-    "grunt-contrib-concat": "*",
-    "load-grunt-tasks": "*"    
+    "gulp": "*",
+    "gulp-concat": "*",
+    "gulp-uglify": "*",
+    "del": "*"
   },
   "keywords": [
     "RxJS",
