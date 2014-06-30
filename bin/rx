@@ -14,6 +14,7 @@ var requiredEnd = require('../lib/footer');
 program
   .version('0.0.1')
   .option('-m, --methods <methods>', 'Include methods')
+  .option('-l, --lite', 'Create lite build')
   .option('-c, --compat', 'Create compat build');
 
 program.on('--help', function(){
