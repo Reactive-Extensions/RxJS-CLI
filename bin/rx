@@ -17,13 +17,16 @@ program
   .option('-m, --methods <methods>', 'Include methods')
   .option('-l, --lite', 'Create lite build')
   .option('-c, --compat', 'Create compat build')
+  .option('-s, --silent', 'Silent output')
   .option('-f, --file <file>', 'Load operators from file');
 
 program.on('--help', function(){
   console.log('  Examples:');
   console.log('');
-  console.log('    $ rx --methods create,filter,map,flatmap,takeuntil');
-  console.log('    $ rx -m create,filter,map,flatmap,takeuntil');
+  console.log('    $ rx --lite --methods create,filter,map,flatmap,takeuntil');
+  console.log('    $ rx -l -m create,filter,map,flatmap,takeuntil');
+  console.log('    $ rx --compat --file methods.js');
+  console.log('    $ rx -c -f methods.js');  
   console.log('');
 });
 
@@ -36,7 +39,7 @@ if (program.methods) {
   // Expect commas to seperate methods
   var methods = program.methods.split(',');
   if (methods.length === 0) {
-    console.log('Methods are required');
+    !program.silent && console.log('Methods are required');
     program.help();
   }
 
@@ -52,12 +55,21 @@ function loadMethods(methods) {
   var requiredFiles = new LocalSet(), locations = [];
 
   methods.forEach(function (method) {
+    !program.silent && console.log('Requested operator %s', method);
+
     var method = method.trim().toLowerCase();
 
     // Check if an alias
     var alias = dependencies.aliases[method];
     if (alias) {
+      !program.silent && console.log('Alias for %s found - %s', method, alias);
       method = alias;
+    }
+
+    // Check if compat
+    if (program.compat) {
+      var compatMethod = method + '-compat';
+      dependencies.operators[m] !== undefined && (method = compatMethod);
     }
 
     recursivelyAdd(method);
@@ -65,7 +77,7 @@ function loadMethods(methods) {
     function recursivelyAdd(m) {
       if (requiredFiles.add(m)) {
 
-        console.log('Adding operator %s', m);
+        !program.silent && console.log('Adding operator %s', m);
 
         // Check the source
         var methodData = dependencies.operators[m];
@@ -117,6 +129,15 @@ gulp.task('minify', ['concat'], function () {
   return gulp.src(['build/' + outputFile])
     .pipe(uglify())
     .pipe(concat(outputMinFile))
+    .pipe(gulp.dest('build'));
+});
+
+gulp.task('sourcemap', ['minify'], function () {
+  return gulp.src(totalFiles)
+    .pipe(sourcemaps.init())
+    .pipe(concat(outputFile))
+    .pipe(uglify())
+    .pipe(sourcemaps.write('../build'))
     .pipe(gulp.dest('build'));
 });
 
