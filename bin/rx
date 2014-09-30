@@ -3,6 +3,7 @@
 var gulp = require('gulp');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
+var sourcemaps = require('gulp-sourcemaps');
 var del = require('del');
 var program = require('commander');
 var dependencies = require('../lib/dependencies');
@@ -12,23 +13,23 @@ var LocalSet = require('../lib/localset');
 var requiredEnd = require('../lib/footer');
 
 program
-  .version('0.0.1')
+  .version('0.0.2')
   .option('-m, --methods <methods>', 'Include methods')
   .option('-l, --lite', 'Create lite build')
-  .option('-c, --compat', 'Create compat build');
+  .option('-c, --compat', 'Create compat build')
+  .option('-f, --file <file>', 'Load operators from file');
 
 program.on('--help', function(){
   console.log('  Examples:');
   console.log('');
-  console.log('    $ cli --methods create,filter,map,flatmap,takeuntil');
-  console.log('    $ cli -m create,filter,map,flatmap,takeuntil');
+  console.log('    $ rx --methods create,filter,map,flatmap,takeuntil');
+  console.log('    $ rx -m create,filter,map,flatmap,takeuntil');
   console.log('');
 });
 
 program.parse(process.argv);
 
-var requiredFiles = new LocalSet(),
-  fileLocations = [];
+var fileLocations = [];
 
 if (program.methods) {
   
@@ -38,6 +39,17 @@ if (program.methods) {
     console.log('Methods are required');
     program.help();
   }
+
+  fileLocations = loadMethods(methods);
+} else if (program.file) {
+  fileLocations = loadMethods(require(program.file).operators);
+} else {
+  console.log('Methods are required');
+  program.help();  
+}
+
+function loadMethods(methods) {
+  var requiredFiles = new LocalSet(), locations = [];
 
   methods.forEach(function (method) {
     var method = method.trim().toLowerCase();
@@ -52,6 +64,9 @@ if (program.methods) {
 
     function recursivelyAdd(m) {
       if (requiredFiles.add(m)) {
+
+        console.log('Adding operator %s', m);
+
         // Check the source
         var methodData = dependencies.operators[m];
         if (!m) {
@@ -59,7 +74,7 @@ if (program.methods) {
           program.help();
         }
 
-        fileLocations.push.apply(fileLocations, methodData.source);
+        locations.push.apply(locations, methodData.source);
 
         // Run the dependencies
         methodData.dependsOn.forEach(function (d) {
@@ -68,15 +83,20 @@ if (program.methods) {
       } 
     }
   });
-} else {
-  // TODO: Load from file?
-  console.log('Methods are required');
-  program.help();
+
+  return locations;  
 }
 
-var requiredStart = program.compat ?
-  require('../lib/headercompat') :
-  require('../lib/header');
+var requiredStart;
+if (program.compat && program.lite) {
+  requiredStart = require('../lib/headerlitecompat');
+} else if (program.compat && !program.lite) {
+  requiredStart = require('../lib/headercompat');
+} else if (!program.compat && program.lite) {
+  requiredStart = require('../lib/headerlite');
+} else {
+  requiredStart = require('../lib/header');
+}
 
 var totalFiles = requiredStart.concat(fileLocations, requiredEnd);
 
