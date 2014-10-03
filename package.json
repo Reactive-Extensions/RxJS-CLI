@@ -2,7 +2,7 @@
   "name": "rx-cli",
   "title": "Reactive Extensions for JavaScript (RxJS) Command Line Interface",
   "description": "RxJS Command Line for Custom Builds",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "homepage": "https://github.com/Reactive-Extensions/RxJS-CLI",
   "author": {
     "name": "Cloud Programmability Team",
