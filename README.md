@@ -1,4 +1,4 @@
-RxJS-CLI v0.0.2-pre
+RxJS-CLI v0.0.3-pre
 ===================
 
 Custom builds makes it easy to create lightweight versions of the [Reactive Extensions for JavaScript \(RxJS\)](https://github.com/Reactive-Extensions/RxJS).  No need to worry about which files are required, just pick the operators you want and we'll handle the dpendencies for you!  This way you can make RxJS as small as you wish, only taking the operators you wish to use!  Note that this build system requires RxJS version 2.3.12+.
