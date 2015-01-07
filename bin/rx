@@ -110,7 +110,12 @@ if (program.compat && program.lite) {
   requiredStart = require('../lib/header');
 }
 
-var totalFiles = requiredStart.concat(fileLocations, requiredEnd);
+var path = require('path');
+var totalFiles = requiredStart
+  .concat(fileLocations, requiredEnd)
+  .map(function (fileLocation) {
+    return path.join(__dirname, '..', fileLocation);
+  });
 
 var outputFile = 'rx.custom.js';
 var outputMinFile = 'rx.custom.min.js';
